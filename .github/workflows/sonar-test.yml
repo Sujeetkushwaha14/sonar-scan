@@ -34,6 +34,25 @@ jobs:
           curl -fsS -u "${SONAR_TOKEN}:"             http://34.180.55.135/api/authentication/validate
           echo
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Secrets Scan - Gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Node dependencies
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci --ignore-scripts
+
+      - name: Dependency Vulnerability Scan - npm audit
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm audit --audit-level=high
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
