@@ -5,7 +5,7 @@ on:
     branches:
       - "**"
   pull_request:
-
+ 
 jobs:
   sonar:
     name: Sonar Scan & Quality Gate
