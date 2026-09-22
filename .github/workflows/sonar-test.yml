@@ -5,7 +5,7 @@ on:
     branches:
       - "**"
   pull_request:
- 
+
 jobs:
   sonar:
     name: Sonar Scan & Quality Gate
@@ -23,11 +23,22 @@ jobs:
           echo "Branch: $GITHUB_REF_NAME"
           echo "Sonar Project Key: sonartest"
 
+      - name: Verify Sonar Token
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "SONAR_TOKEN is not configured"
+            exit 1
+          fi
+          curl -fsS -u "${SONAR_TOKEN}:"             http://34.180.55.135/api/authentication/validate
+          echo
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: http://34.180.55.135
         with:
           args: >
             -Dsonar.projectKey=sonartest
@@ -39,6 +50,7 @@ jobs:
         timeout-minutes: 10
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://34.180.55.135
 
       - name: SONAR TEST PASSED
         run: |
