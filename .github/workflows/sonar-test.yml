@@ -12,41 +12,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-      # 1. Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2. SonarQube Scan
+      - name: Check Sonar Configuration
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Branch: $GITHUB_REF_NAME"
+          echo "Sonar Project Key: sonartest"
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
         with:
           args: >
-            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
-            -Dsonar.projectName=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.projectKey=sonartest
+            -Dsonar.projectName=sonartest
             -Dsonar.sources=.
 
-      # 3. SonarQube Quality Gate
-      #    FAIL -> workflow stops
-      #    PASS -> next step runs
       - name: Sonar Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@v1
         timeout-minutes: 10
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # 4. Runs ONLY if Quality Gate passes
-      - name: Final Test
+      - name: SONAR TEST PASSED
         run: |
-          echo "========================================"
-          echo "        SONAR TEST PASSED"
-          echo "========================================"
-          echo "Quality Gate  : PASSED"
-          echo "Security Scan : PASSED"
-          echo "Code Analysis : PASSED"
-          echo "========================================"
+          echo "=============================="
+          echo "      SONAR TEST PASSED"
+          echo "=============================="
